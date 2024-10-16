@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Related Search</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Upload your drawing and search the product</h1>
+    <input type="file" id="image-upload" accept="image/*" onchange="loadImage(event)">
+    <div id="image-container"></div>
+    <div id="label-container"></div>
+    <button type="button" onclick="init()">Start</button>
+    
+    <div class="container">
+        <input type="text" id="imageName" placeholder="Search your product">
+        <button onclick="fetchImages()">Related Search</button>
+        <div id="imageContainer"></div>
+    </div>
+    <a href="index.html">back</a>
+    <script src="fetch.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+        // More API functions here:
+        // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+
+        // the link to your model provided by Teachable Machine export panel
+        const URL = "https://teachablemachine.withgoogle.com/models/UnpCdS5jp/";
+
+        let model, labelContainer, maxPredictions, imageElement;
+
+        // Load the image model
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            // Load the model and metadata
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            // Append elements to the DOM
+            labelContainer = document.getElementById("label-container");
+            for (let i = 0; i < maxPredictions; i++) { // Add class labels
+                labelContainer.appendChild(document.createElement("div"));
+            }
+        }
+
+        function loadImage(event) {
+            const imageContainer = document.getElementById("image-container");
+            imageContainer.innerHTML = ""; // Clear previous image
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.width = 200; // Set a width for the image
+                img.height = 200; // Set a height for the image
+                img.onload = async function() {
+                    imageContainer.appendChild(img);
+                    imageElement = img;
+                    await predict();
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Run the image through the image model
+        async function predict() {
+            if (!imageElement) return;
+            const prediction = await model.predict(imageElement);
+            labelContainer.innerHTML = ""; // Clear previous predictions
+            const highestPrediction = prediction.reduce((max, p) => p.probability > max.probability ? p : max, prediction[0]);
+            const classPrediction = highestPrediction.className + ": " + highestPrediction.probability.toFixed(2);
+            labelContainer.appendChild(document.createElement("div")).innerHTML = classPrediction;
+
+            // Update the input field with the prediction result
+            document.getElementById("imageName").value = highestPrediction.className;
+        }
+    </script>
+</body>
+</html>

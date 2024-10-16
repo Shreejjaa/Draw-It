@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Paint</title>
+    <h1>Draw It and search your product</h1>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #toolbar {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .tool {
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        canvas {
+            border: 1px solid black;
+        }
+        .color {
+            width: 30px;
+            height: 30px;
+            margin: 2px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="toolbar">
+        <div class="color" style="background-color: #000000;"></div>
+        <div class="color" style="background-color: #808080;"></div>
+        <div class="color" style="background-color: #C0C0C0;"></div>
+        <div class="color" style="background-color: #FFFFFF;"></div>
+        <div class="color" style="background-color: #800000;"></div>
+        <div class="color" style="background-color: #FF0000;"></div>
+        <div class="color" style="background-color: #808000;"></div>
+        <div class="color" style="background-color: #FFFF00;"></div>
+        <div class="color" style="background-color: #008000;"></div>
+        <div class="color" style="background-color: #00FF00;"></div>
+        <div class="color" style="background-color: #008080;"></div>
+        <div class="color" style="background-color: #00FFFF;"></div>
+        <div class="color" style="background-color: #000080;"></div>
+        <div class="color" style="background-color: #0000FF;"></div>
+        <div class="color" style="background-color: #800080;"></div>
+        <div class="color" style="background-color: #FF00FF;"></div>
+        <select id="brushSize" class="tool">
+            <option value="2">2</option>
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+        </select>
+        <button id="eraser" class="tool">Eraser</button>
+        <button id="clearCanvas" class="tool">Clear</button>
+        <button id="scanDrawing" class="tool">save it </button>
+    </div>
+    
+    <a href="predict.html">scan and search the product</a>
+    
+    <canvas id="drawingCanvas" width="800" height="600"></canvas>
+    <script src="canvas.js"></script>
+</body>
+</html>
