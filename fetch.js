@@ -5,7 +5,7 @@ function fetchImages() {
     imageContainer.innerHTML = '';
 
     const images = {
-        'yellow one shoulder top': ['images/yellow1.png', 'images/yellow2.png'],
+        'yellow one shoulder top': ['yellow1.png', 'images/yellow2.png'],
         'blue off shoulder top': ['images/blue1.png', 'images/blue2.png'],
         'pink short skirt': ['images/pink1.png', 'images/pink2.png'],
         'white  sunflower printed dress': ['images/sun1.png', 'images/sun2.png'],
