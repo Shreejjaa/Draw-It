@@ -5,11 +5,11 @@ function fetchImages() {
     imageContainer.innerHTML = '';
 
     const images = {
-        'yellow one shoulder top': ['yellow1.png', 'images/yellow2.png'],
-        'blue off shoulder top': ['images/blue1.png', 'images/blue2.png'],
-        'pink short skirt': ['images/pink1.png', 'images/pink2.png'],
-        'white  sunflower printed dress': ['images/sun1.png', 'images/sun2.png'],
-        'green trouser': ['images/trouser1.png', ]
+        'yellow one shoulder top': ['yellow1.png', 'yellow2.png'],
+        'blue off shoulder top': ['blue1.png', 'blue2.png'],
+        'pink short skirt': ['pink1.png', 'pink2.png'],
+        'white  sunflower printed dress': ['sun1.png', 'sun2.png'],
+        'green trouser': ['trouser1.png', 'trouser2.png' ]
 
 
         
