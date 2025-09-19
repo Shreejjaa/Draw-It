@@ -1,84 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Related Search</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Your Drawing</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
 </head>
 <body>
-    <h1>Upload your drawing and search the product</h1>
-    <input type="file" id="image-upload" accept="image/*" onchange="loadImage(event)">
-    <div id="image-container"></div>
-    <div id="label-container"></div>
-    <button type="button" onclick="init()">Start</button>
-    
-    <div class="container">
-        <input type="text" id="imageName" placeholder="Search your product">
-        <button onclick="fetchImages()">Related Search</button>
-        <div id="imageContainer"></div>
-    </div>
-    <a href="index.html">back</a>
-    <script src="fetch.js"></script>
+  <div class="container">
+    <h2>Upload Your Drawing & Find Similar Products</h2>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-    <script type="text/javascript">
-        // More API functions here:
-        // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+    <!-- File upload -->
+    <input type="file" id="upload" accept="image/*">
+    <br><br>
 
-        // the link to your model provided by Teachable Machine export panel
-        const URL = "https://teachablemachine.withgoogle.com/models/UnpCdS5jp/";
+    <!-- Preview uploaded image -->
+    <img id="preview" width="200">
+    <br><br>
 
-        let model, labelContainer, maxPredictions, imageElement;
+    <!-- Prediction result -->
+    <p id="prediction">Prediction will appear here</p>
 
-        // Load the image model
-        async function init() {
-            const modelURL = URL + "model.json";
-            const metadataURL = URL + "metadata.json";
+    <!-- Show related button -->
+    <button id="showRelatedBtn">🔍 Show Related Products</button>
 
-            // Load the model and metadata
-            model = await tmImage.load(modelURL, metadataURL);
-            maxPredictions = model.getTotalClasses();
+    <div id="imageContainer" style="margin-top:20px;"></div>
 
-            // Append elements to the DOM
-            labelContainer = document.getElementById("label-container");
-            for (let i = 0; i < maxPredictions; i++) { // Add class labels
-                labelContainer.appendChild(document.createElement("div"));
-            }
+    <br>
+    <a href="index.html">← Back</a>
+  </div>
+
+  <script>
+    let model;
+
+    async function initModel() {
+      const modelURL = "./model/model.json";
+      const metadataURL = "./model/metadata.json";
+      model = await tmImage.load(modelURL, metadataURL);
+      console.log("✅ Model loaded successfully");
+    }
+
+    // Call when page loads
+    window.onload = initModel;
+
+    const uploadInput = document.getElementById("upload");
+    const preview = document.getElementById("preview");
+    const predictionText = document.getElementById("prediction");
+
+    uploadInput.addEventListener("change", async function () {
+      const file = uploadInput.files[0];
+      if (!file) return;
+
+      // Show preview
+      preview.src = URL.createObjectURL(file);
+
+      // Predict once image is loaded
+      preview.onload = async function () {
+        if (!model) {
+          predictionText.innerText = "⚠️ Model not loaded yet.";
+          return;
         }
+        const prediction = await model.predict(preview);
+        prediction.sort((a, b) => b.probability - a.probability);
+        const best = prediction[0].className;
+        predictionText.innerText = "Prediction: " + best;
 
-        function loadImage(event) {
-            const imageContainer = document.getElementById("image-container");
-            imageContainer.innerHTML = ""; // Clear previous image
-            const file = event.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.src = e.target.result;
-                img.width = 200; // Set a width for the image
-                img.height = 200; // Set a height for the image
-                img.onload = async function() {
-                    imageContainer.appendChild(img);
-                    imageElement = img;
-                    await predict();
-                }
-            };
-            reader.readAsDataURL(file);
-        }
+        // Attach to button
+        document.getElementById("showRelatedBtn").onclick = () => {
+          fetchImages(best);
+        };
+      };
+    });
+  </script>
 
-        // Run the image through the image model
-        async function predict() {
-            if (!imageElement) return;
-            const prediction = await model.predict(imageElement);
-            labelContainer.innerHTML = ""; // Clear previous predictions
-            const highestPrediction = prediction.reduce((max, p) => p.probability > max.probability ? p : max, prediction[0]);
-            const classPrediction = highestPrediction.className + ": " + highestPrediction.probability.toFixed(2);
-            labelContainer.appendChild(document.createElement("div")).innerHTML = classPrediction;
-
-            // Update the input field with the prediction result
-            document.getElementById("imageName").value = highestPrediction.className;
-        }
-    </script>
+  <script src="fetch.js"></script>
 </body>
 </html>
