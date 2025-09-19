@@ -1,30 +1,33 @@
-function fetchImages() {
-    
-    const imageName = document.getElementById('imageName').value.toLowerCase();
-    const imageContainer = document.getElementById('imageContainer');
-    imageContainer.innerHTML = '';
+function fetchImages(imageName) {
+  const imageContainer = document.getElementById('imageContainer');
+  imageContainer.innerHTML = '';
 
-    const images = {
-        'yellow one shoulder top': ['yellow1.png', 'yellow2.png'],
-        'blue off shoulder top': ['blue1.png', 'blue2.png'],
-        'pink short skirt': ['pink1.png', 'pink2.png'],
-        'white  sunflower printed dress': ['sun1.png', 'sun2.png'],
-        'green trouser': ['trouser1.png', 'trouser2.png' ]
+  // Normalize prediction (remove spaces, lowercase, trim)
+  imageName = imageName.toLowerCase().trim();
 
+  // Predefined mapping of predictions to product images
+  const images = {
+    'dress': ['dress1.png', 'dress2.png', 'dress3.png', 'dress4.png', 'dress5.png'],
+    'shoes': ['shoes1.png', 'shoes2.png', 'shoes3.png', 'shoes4.png', 'shoes5.png'],
+    't-shirt': ['t-shirt1.png', 't-shirt2.png', 't-shirt3.png', 't-shirt4.png', 't-shirt5.png'],
+    'bag': ['bag1.png', 'bag2.png', 'bag3.png', 'bag4.png', 'bag5.png']
+  };
 
-        
-        
-        // Add more image arrays as needed
-    };
+  if (images[imageName]) {
+    images[imageName].forEach(src => {
+      const img = document.createElement('img');
+      img.src = "images/" + src;  // make sure your images are inside /images folder
+      img.alt = imageName;
+      img.classList.add('result-img');
+      
+      // Make images clickable (Google search)
+      img.addEventListener('click', () => {
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(imageName)}`, '_blank');
+      });
 
-    if (images[imageName]) {
-        images[imageName].forEach(src => {
-            const img = document.createElement('img');
-            img.src = src;
-            img.alt = imageName;
-            imageContainer.appendChild(img);
-        });
-    } else {
-        imageContainer.innerHTML = '<p>Images not found</p>';
-    }
+      imageContainer.appendChild(img);
+    });
+  } else {
+    imageContainer.innerHTML = `<p style="color:red;">No matching images found for "${imageName}".</p>`;
+  }
 }
