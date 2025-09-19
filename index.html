@@ -1,73 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Paint</title>
-    <h1>Draw It and search your product</h1>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        #toolbar {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-        }
-        .tool {
-            margin: 0 5px;
-            cursor: pointer;
-        }
-        canvas {
-            border: 1px solid black;
-        }
-        .color {
-            width: 30px;
-            height: 30px;
-            margin: 2px;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Draw It and Search Your Product</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f2f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 20px 0;
+      font-size: 28px;
+      text-align: center;
+    }
+
+    .toolbar {
+      margin-bottom: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      border: 2px solid #333;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      cursor: crosshair;
+    }
+
+    button, select, input[type="color"] {
+      padding: 6px 10px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #fff;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #0077cc;
+      color: #fff;
+    }
+
+    /* Template gallery */
+    .templates {
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .template-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .template-gallery img {
+      width: 80px;
+      height: 80px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, border 0.2s;
+      object-fit: contain;
+      background: #fff;
+      padding: 5px;
+    }
+
+    .template-gallery img:hover {
+      transform: scale(1.1);
+      border-color: #0077cc;
+    }
+  </style>
 </head>
 <body>
-    <div id="toolbar">
-        <div class="color" style="background-color: #000000;"></div>
-        <div class="color" style="background-color: #808080;"></div>
-        <div class="color" style="background-color: #C0C0C0;"></div>
-        <div class="color" style="background-color: #FFFFFF;"></div>
-        <div class="color" style="background-color: #800000;"></div>
-        <div class="color" style="background-color: #FF0000;"></div>
-        <div class="color" style="background-color: #808000;"></div>
-        <div class="color" style="background-color: #FFFF00;"></div>
-        <div class="color" style="background-color: #008000;"></div>
-        <div class="color" style="background-color: #00FF00;"></div>
-        <div class="color" style="background-color: #008080;"></div>
-        <div class="color" style="background-color: #00FFFF;"></div>
-        <div class="color" style="background-color: #000080;"></div>
-        <div class="color" style="background-color: #0000FF;"></div>
-        <div class="color" style="background-color: #800080;"></div>
-        <div class="color" style="background-color: #FF00FF;"></div>
-        <select id="brushSize" class="tool">
-            <option value="2">2</option>
-            <option value="5" selected>5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-        </select>
-        <button id="eraser" class="tool">Eraser</button>
-        <button id="clearCanvas" class="tool">Clear</button>
-        <button id="scanDrawing" class="tool">save it </button>
+  <h1>Draw It and Search Your Product</h1>
+
+  <div class="toolbar">
+    <input type="color" id="colorPicker" value="#000000">
+    <select id="sizePicker">
+      <option value="3">3px</option>
+      <option value="5">5px</option>
+      <option value="8" selected>8px</option>
+      <option value="12">12px</option>
+      <option value="16">16px</option>
+    </select>
+    <button id="eraser">Eraser</button>
+    <button id="clear">Clear</button>
+    <button id="save">Save</button>
+    <!-- ✅ New Scan & Search button -->
+    <button onclick="scanAndSearch()">Scan & Search</button>
+  </div>
+
+  <!-- Canvas -->
+  <canvas id="canvas" width="600" height="400"></canvas>
+
+  <!-- Template Gallery -->
+  <div class="templates">
+    <h2>Or choose a template:</h2>
+    <div class="template-gallery">
+      <img src="templates/tshirt.png" alt="T-shirt Template">
+      <img src="templates/dress.png" alt="Dress Template">
+      <img src="templates/shoes.png" alt="Shoes Template">
+      <img src="templates/bag.png" alt="Bag Template">
     </div>
-    
-    <a href="predict.html">scan and search the product</a>
-    
-    <canvas id="drawingCanvas" width="800" height="600"></canvas>
-    <script src="canvas.js"></script>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    let erasing = false;
+
+    // Toolbar elements
+    const colorPicker = document.getElementById('colorPicker');
+    const sizePicker = document.getElementById('sizePicker');
+    const eraserBtn = document.getElementById('eraser');
+    const clearBtn = document.getElementById('clear');
+    const saveBtn = document.getElementById('save');
+
+    // Drawing functions
+    canvas.addEventListener('mousedown', (e) => {
+      drawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!drawing) return;
+      ctx.lineWidth = sizePicker.value;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = erasing ? '#ffffff' : colorPicker.value;
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      drawing = false;
+      ctx.closePath();
+    });
+
+    // Buttons
+    eraserBtn.addEventListener('click', () => {
+      erasing = !erasing;
+      eraserBtn.style.background = erasing ? '#0077cc' : '#fff';
+      eraserBtn.style.color = erasing ? '#fff' : '#000';
+    });
+
+    clearBtn.addEventListener('click', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    saveBtn.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'drawing.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+
+    // Template click → load into canvas
+    document.querySelectorAll('.template-gallery img').forEach(img => {
+      img.addEventListener('click', () => {
+        const templateImg = new Image();
+        templateImg.src = img.src;
+        templateImg.onload = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(templateImg, 100, 50, 400, 300);
+        };
+      });
+    });
+
+    // ✅ Redirect to predict.html
+    function scanAndSearch() {
+      window.location.href = "predict.html";
+    }
+  </script>
 </body>
 </html>
